@@ -378,6 +378,117 @@ EOF
 
 - In Minikube in namespace kube-system, there are many different pods running. Your task is to figure out who creates them, and who makes sure they are running (restores them after deletion).
 
+Okay. Let's delete a pod in the kube-system namespace
+<pre>
+┌─[ 1:49][][alexLaptop][±][main ✓]
+├─[~/_GIT/github/EPAM/devops-school-kubernetes/Task2/canary_deployment]
+└─▪ kubectl get pod --namespace kube-system
+NAME                                        READY   STATUS      RESTARTS        AGE
+local-path-provisioner-84bb864455-s4v77     1/1     Running     1 (4h36m ago)   20h
+coredns-96cc4f57d-k4skf                     1/1     Running     1 (4h36m ago)   20h
+metrics-server-ff9dbcb6c-rrc6v              1/1     Running     0               20m
+
+┌─[ 2:02][][alexLaptop][±][main ✓]
+├─[~/_GIT/github/EPAM/devops-school-kubernetes/Task2/canary_deployment]
+└─▪ kubectl delete pod local-path-provisioner-84bb864455-s4v77 --namespace kube-system
+pod "local-path-provisioner-84bb864455-s4v77" deleted
+
+┌─[ 2:03][][alexLaptop][±][main ✓]
+├─[~/_GIT/github/EPAM/devops-school-kubernetes/Task2/canary_deployment]
+└─▪ kubectl get pod --namespace kube-system
+NAME                                        READY   STATUS      RESTARTS        AGE
+local-path-provisioner-84bb864455-s4v77     1/1     Terminating 1 (4h36m ago)   20h
+coredns-96cc4f57d-k4skf                     1/1     Running     1 (4h38m ago)   20h
+metrics-server-ff9dbcb6c-rrc6v              1/1     Running     0               22m
+local-path-provisioner-84bb864455-thdhf     1/1     Pending     0               1s
+
+┌─[ 2:03][][alexLaptop][±][main ✓]
+├─[~/_GIT/github/EPAM/devops-school-kubernetes/Task2/canary_deployment]
+└─▪ kubectl get pod --namespace kube-system
+NAME                                        READY   STATUS      RESTARTS        AGE
+coredns-96cc4f57d-k4skf                     1/1     Running     1 (4h38m ago)   20h
+metrics-server-ff9dbcb6c-rrc6v              1/1     Running     0               22m
+local-path-provisioner-84bb864455-thdhf     1/1     Running     0               10s
+</pre>
+
+Okay. As you can see the deleted pod was successfully deleted and a new one was created.
+
+<pre>
+┌─[ 2:04][][alexLaptop][±][main U:1 ✗]
+├─[~/_GIT/github/EPAM/devops-school-kubernetes/Task2/canary_deployment]
+└─▪ kubectl describe pod local-path-provisioner-84bb864455-thdhf --namespace kube-system
+Name:                 local-path-provisioner-84bb864455-thdhf
+Namespace:            kube-system
+Priority:             2000001000
+Priority Class Name:  system-node-critical
+Node:                 homepc/192.168.44.110
+Start Time:           Sun, 06 Feb 2022 14:03:04 +0500
+Labels:               app=local-path-provisioner
+pod-template-hash=84bb864455
+Annotations:          <none>
+Status:               Running
+IP:                   10.42.0.19
+IPs:
+IP:           10.42.0.19
+Controlled By:  ReplicaSet/local-path-provisioner-84bb864455
+Containers:
+local-path-provisioner:
+Container ID:  containerd://00aa17b9982c147bffea9040d4851b2d925886060ef86797fa3443a786451737
+Image:         rancher/local-path-provisioner:v0.0.21
+Image ID:      docker.io/rancher/local-path-provisioner@sha256:1da612c913ce0b4ab82e20844baa9dce1f7065e39412d6a0bb4de99c413f21bf
+Port:          <none>
+Host Port:     <none>
+Command:
+local-path-provisioner
+start
+--config
+/etc/config/config.json
+State:          Running
+Started:      Sun, 06 Feb 2022 14:03:05 +0500
+Ready:          True
+Restart Count:  0
+Environment:
+POD_NAMESPACE:  kube-system (v1:metadata.namespace)
+Mounts:
+/etc/config/ from config-volume (rw)
+/var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-7qbdk (ro)
+Conditions:
+Type              Status
+Initialized       True
+Ready             True
+ContainersReady   True
+PodScheduled      True
+Volumes:
+config-volume:
+Type:      ConfigMap (a volume populated by a ConfigMap)
+Name:      local-path-config
+Optional:  false
+kube-api-access-7qbdk:
+Type:                    Projected (a volume that contains injected data from multiple sources)
+TokenExpirationSeconds:  3607
+ConfigMapName:           kube-root-ca.crt
+ConfigMapOptional:       <nil>
+DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 CriticalAddonsOnly op=Exists
+node-role.kubernetes.io/control-plane:NoSchedule op=Exists
+node-role.kubernetes.io/master:NoSchedule op=Exists
+node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+Type    Reason     Age   From               Message
+  ----    ------     ----  ----               -------
+Normal  Scheduled  16m   default-scheduler  Successfully assigned kube-system/local-path-provisioner-84bb864455-thdhf to homepc
+Normal  Pulled     16m   kubelet            Container image "rancher/local-path-provisioner:v0.0.21" already present on machine
+Normal  Created    16m   kubelet            Created container local-path-provisioner
+Normal  Started    16m   kubelet            Started container local-path-provisioner
+</pre>
+
+Okaaay, from the description above we can see that the pod is controlled by:
+Controlled By:  ReplicaSet/local-path-provisioner-84bb864455
+So it was the replication set local-path-provisioner-84bb864455, I believe,  which issued to deploy another pod. O_o
+
 
 - Implement Canary deployment of an application via Ingress. Traffic to canary deployment should be redirected if you add "canary:always" in the header, otherwise it should go to regular deployment. Set to redirect a percentage of traffic to canary deployment.
 
