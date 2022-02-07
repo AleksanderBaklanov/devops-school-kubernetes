@@ -584,9 +584,11 @@ one yaml file to implement an ingress service to redirect web traffic into the n
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: nginx
+  name: canary-nginx
+  namespace: default
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    kubernetes.io/ingress.class: nginx
+  name: nginx-canary
 spec:
   rules:
     - host: hello-world.net
@@ -597,7 +599,7 @@ spec:
             backend:
               service:
                 name: nginx-v1
-                port: 
+                port:
                   number: 80
 </pre>
 
@@ -710,7 +712,9 @@ metadata:
   namespace: default
   annotations:
     kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/canary: &quot;true&quot;
+    nginx.ingress.kubernetes.io/canary: 'true'
+    nginx.ingress.kubernetes.io/canary-by-header: Canary
+    nginx.ingress.kubernetes.io/canary-by-header-pattern: True|true
   name: nginx-canary
 spec:
   rules:

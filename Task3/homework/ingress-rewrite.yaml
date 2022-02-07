@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      rewrite ^(/web)$ $1/ redirect;
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+  name: minio-ingress-rewrite
+  namespace: default
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: minio-my-minio.net
+      http:
+        paths:
+          - path: /web(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: minio-app
+                port:
+                  number: 9001
