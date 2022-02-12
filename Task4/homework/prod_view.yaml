@@ -1,0 +1,30 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: prod_view_role
+  namespace: prod
+rules:
+- apiGroups:
+  - apps
+  verbs:
+  - get
+  - watch
+  - list
+  resources:
+  - pods
+  - deployments
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: prod_view
+  namespace: prod
+subjects:
+- kind: User
+  name: prod_view
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: prod_view_role
+  apiGroup: rbac.authorization.k8s.io

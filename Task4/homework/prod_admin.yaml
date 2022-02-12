@@ -1,0 +1,37 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: prod_admin_role
+  namespace: prod
+rules:
+- apiGroups:
+  - apps
+  verbs:
+  - get
+  - watch
+  - list
+  - create
+  - update
+  - patch
+  - delete
+  resources:
+  - pods
+  - deployments
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: prod_admim
+  namespace: prod
+subjects:
+- kind: User
+  name: prod_admin
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: prod_admin_role
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: prod_admin_role
+  apiGroup: rbac.authorization.k8s.io
